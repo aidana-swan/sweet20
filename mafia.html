@@ -114,6 +114,45 @@
   .front .tl{top:16px;left:20px}.front .br{bottom:16px;right:20px}
   .hold{font-family:"Montserrat",sans-serif;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);text-align:center;margin-top:20px}
   .who{text-align:center;font-family:"Pinyon Script",cursive;font-size:38px;color:var(--blue-deep);line-height:1.1}
+
+  /* admin */
+  .cells{display:flex;flex-direction:column;gap:12px;max-width:330px;margin:18px auto 0;width:100%}
+  .cell{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:16px 18px;box-shadow:0 18px 30px -28px rgba(47,66,88,.5)}
+  .cell.mafia{background:linear-gradient(170deg,#3a5069,var(--navy));border-color:var(--navy);color:#f3f6fa}
+  .cell.off{opacity:.45}
+  .cell-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+  .cell-role{font-family:"Pinyon Script",cursive;font-size:32px;line-height:1;color:var(--blue-deep)}
+  .cell.mafia .cell-role{color:#dfe9f3}
+  .cell-who{font-size:16px;font-style:italic;color:var(--muted);text-align:right}
+  .cell.mafia .cell-who{color:rgba(255,255,255,.65)}
+  .cell-who s{opacity:.6}
+  .cell-act{margin-top:10px;font-family:"Montserrat",sans-serif;font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
+  .cell.mafia .cell-act{color:rgba(255,255,255,.55)}
+  .chips2{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+  .chip2{border:1px solid var(--line);background:var(--ivory);color:var(--ink);border-radius:999px;padding:7px 12px;font-family:"Cormorant Garamond",serif;font-size:16.5px;cursor:pointer}
+  .cell.mafia .chip2{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.25);color:#f3f6fa}
+  .chip2.sel{background:var(--blue-deep);border-color:var(--blue-deep);color:#fff}
+  .cell.mafia .chip2.sel{background:#dfe9f3;color:var(--navy);border-color:#dfe9f3}
+  .chip2:disabled{opacity:.3;text-decoration:line-through;cursor:default}
+  .verdict{margin-top:10px;font-size:17px}
+  .verdict b{font-weight:600}
+  .verdict .yes{color:#a2564d}
+  .verdict .no{color:var(--blue-deep)}
+  .announce{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:20px;text-align:center;font-size:20px;line-height:1.45;max-width:330px;margin:18px auto 0}
+  .announce .big{font-family:"Pinyon Script",cursive;font-size:38px;color:var(--blue-deep);display:block;line-height:1.1;margin-bottom:4px}
+  .plist{list-style:none}
+  .plist li{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:18px;cursor:pointer}
+  .plist li:last-child{border-bottom:none}
+  .plist li span{font-style:italic;color:var(--muted);font-size:16px}
+  .plist li.dead{opacity:.4}
+  .plist li.dead .pn{text-decoration:line-through}
+  .plist .r-mafia{color:var(--navy);font-weight:600;font-style:normal}
+  .log{padding-left:20px;font-size:16.5px;line-height:1.5}
+  .log li{margin-bottom:8px}
+  .log b{color:var(--blue-deep);font-weight:600}
+  .win{background:linear-gradient(170deg,#3a5069,var(--navy));color:#f3f6fa;border-radius:20px;padding:24px;text-align:center;max-width:330px;margin:16px auto 0;width:100%}
+  .win .big{font-family:"Pinyon Script",cursive;font-size:46px;line-height:1.1;color:#dfe9f3;display:block}
+  .win p{font-style:italic;opacity:.85;font-size:17px;margin-top:6px}
 </style>
 </head>
 <body>
@@ -213,6 +252,7 @@
     <div class="kicker" style="margin-top:10px">код игры</div>
     <div class="code-big" id="codeBig"></div>
     <p class="sub">Попроси всех открыть сайт, нажать «я играю» и ввести этот код</p>
+    <button class="btn" id="startGame" style="margin-top:22px">все зарегистрировались, начать</button>
 
     <div class="label">роли игроков</div>
     <button class="btn ghost" id="revealRoles">показать роли (только мне)</button>
@@ -229,8 +269,39 @@
       <p>Мирные побеждают, когда вся мафия выбыла. Мафия побеждает, когда её не меньше, чем мирных.</p>
     </div>
 
-    <button class="btn" id="newRound">новый раунд, те же игроки</button>
+    <button class="btn ghost" id="newRound">новый раунд, те же игроки</button>
     <button class="link" data-go="s-host">изменить игроков</button>
+  </section>
+
+  <!-- HOST: ADMIN -->
+  <section class="screen" id="s-admin">
+    <div class="kicker" style="margin-top:6px" id="adKick">ведущая · код <span id="adCode"></span></div>
+    <h2 id="adTitle">Ночь 1</h2>
+    <p class="sub" id="adSub"></p>
+    <div class="win hidden" id="winBox"></div>
+
+    <div id="nightBox">
+      <div class="cells" id="cells"></div>
+      <div class="err" id="nightErr"></div>
+      <button class="btn" id="toMorning">наступает утро</button>
+    </div>
+
+    <div id="dayBox" class="hidden">
+      <div class="announce" id="announce"></div>
+      <div class="label">голосование · кого выгоняет город?</div>
+      <div class="names" id="voteNames"></div>
+      <button class="btn" id="voteGo" disabled>выгнать</button>
+      <button class="btn ghost" id="voteSkip">никого не выгоняем</button>
+    </div>
+
+    <div class="label">игроки · нажми, чтобы отметить выбывшую</div>
+    <div class="panel" style="padding:8px 18px"><ul class="plist" id="plist"></ul></div>
+
+    <div class="label">история</div>
+    <div class="panel"><ol class="log" id="log"></ol><p class="sub" id="logEmpty" style="font-size:15px">Пока пусто</p></div>
+
+    <button class="btn ghost" id="adNew" style="margin-top:22px">новый раунд, те же игроки</button>
+    <button class="link" id="adBack">к коду игры</button>
   </section>
 </main>
 
@@ -362,6 +433,7 @@
   upd();
 
   function makeGame(){
+    st=null; saveSt();
     var mask=0; sel.forEach(function(s,i){if(s)mask|=1<<i});
     var seed=Math.floor(Math.random()*8191)+1;
     hostGame=decode(encode({mask:mask,m:mCount,doc:doc,com:com,seed:seed}));
@@ -381,8 +453,138 @@
     this.textContent=p.classList.contains("hidden")?"показать роли (только мне)":"скрыть роли";
   });
 
+  // ---------- host admin ----------
+  var st=null;
+  function saveSt(){ sset("mafiaHost", st?JSON.stringify(st):null) }
+  function alive(p){ return !st.dead[p] }
+  function holders(role){ return st.players.filter(function(p){return st.roles[p]===role}) }
+  function aliveHolders(role){ return holders(role).filter(alive) }
+  function startAdmin(){
+    st={code:hostGame.code, players:hostGame.players.slice(), roles:assign(hostGame), dead:{}, round:1, phase:"night",
+        pick:{mafia:null,doctor:null,commissar:null}, lastHeal:null, selfUsed:false, log:[], dayPick:null, morning:null, winner:null};
+    saveSt(); renderAdmin(); go("s-admin");
+  }
+  function checkWin(){
+    var m=st.players.filter(function(p){return alive(p)&&st.roles[p]==="mafia"}).length;
+    var o=st.players.filter(function(p){return alive(p)&&st.roles[p]!=="mafia"}).length;
+    if(m===0) return "city"; if(m>=o) return "mafia"; return null;
+  }
+  function nameList(arr){ return arr.length?arr.join(", "):"—" }
+
+  function cellHTML(role,title,act){
+    var hs=holders(role); if(!hs.length) return "";
+    var al=aliveHolders(role), off=al.length===0;
+    var who=hs.map(function(p){return alive(p)?p:"<s>"+p+"</s>"}).join(", ");
+    var h='<div class="cell '+(role==="mafia"?"mafia":"")+(off?" off":"")+'"><div class="cell-top"><div class="cell-role">'+title+'</div><div class="cell-who">'+who+'</div></div>';
+    if(off){ return h+'<div class="cell-act">выбыла, этот шаг пропускаем</div></div>'; }
+    h+='<div class="cell-act">'+act+'</div><div class="chips2">';
+    st.players.filter(alive).forEach(function(p){
+      var dis=false, why="";
+      if(role==="mafia" && st.roles[p]==="mafia") dis=true;
+      if(role==="doctor"){ if(p===st.lastHeal) dis=true; if(st.roles[p]==="doctor" && st.selfUsed) dis=true; }
+      if(role==="commissar" && st.roles[p]==="commissar") dis=true;
+      h+='<button class="chip2'+(st.pick[role]===p?" sel":"")+'" data-role="'+role+'" data-p="'+p+'"'+(dis?" disabled":"")+'>'+p+'</button>';
+    });
+    h+='</div>';
+    if(role==="commissar" && st.pick.commissar){
+      var isM=st.roles[st.pick.commissar]==="mafia";
+      h+='<div class="verdict">'+st.pick.commissar+': '+(isM?'<b class="yes">мафия</b>, кивни':'<b class="no">не мафия</b>, покачай головой')+'</div>';
+    }
+    if(role==="doctor"){
+      var notes=[]; if(st.lastHeal) notes.push("прошлой ночью: "+st.lastHeal); notes.push(st.selfUsed?"себя уже лечила":"себя можно 1 раз");
+      h+='<div class="cell-act" style="margin-top:10px;letter-spacing:.12em;text-transform:none;font-family:Cormorant Garamond,serif;font-style:italic;font-size:15px">'+notes.join(" · ")+'</div>';
+    }
+    return h+'</div>';
+  }
+
+  function renderAdmin(){
+    if(!st) return;
+    document.getElementById("adCode").textContent=st.code;
+    var night=st.phase==="night", day=st.phase==="day", over=st.phase==="over";
+    document.getElementById("adTitle").textContent = over ? "Игра окончена" : (night?"Ночь ":"День ")+st.round;
+    document.getElementById("adSub").textContent = night ? "Отмечай, на кого молча показывают" : day ? "Объяви итоги ночи и проведи голосование" : "";
+    document.getElementById("nightBox").classList.toggle("hidden",!night);
+    document.getElementById("dayBox").classList.toggle("hidden",!day);
+
+    if(night){
+      document.getElementById("cells").innerHTML =
+        cellHTML("mafia","Mafia","кого убивают")+cellHTML("doctor","Doctor","кого спасает")+cellHTML("commissar","Commissar","кого проверяет");
+      document.getElementById("nightErr").textContent="";
+    }
+    if(day){
+      document.getElementById("announce").innerHTML=st.morning;
+      var vb=document.getElementById("voteNames"); vb.innerHTML="";
+      st.players.filter(alive).forEach(function(p){
+        var b=document.createElement("button"); b.className="name"+(st.dayPick===p?" sel":""); b.textContent=p;
+        b.addEventListener("click",function(){st.dayPick=(st.dayPick===p?null:p);saveSt();renderAdmin()});
+        vb.appendChild(b);
+      });
+      var vg=document.getElementById("voteGo"); vg.disabled=!st.dayPick; vg.textContent=st.dayPick?("выгнать "+st.dayPick):"выгнать";
+    }
+    var wb=document.getElementById("winBox");
+    if(over){
+      wb.classList.remove("hidden");
+      wb.innerHTML = st.winner==="city" ? '<span class="big">Город победил</span><p>Вся мафия раскрыта. Мирные жительницы, вы прекрасны 🤍</p>' : '<span class="big">Мафия победила</span><p>Мафия: '+nameList(holders("mafia"))+'. Город так и не догадался…</p>';
+    } else wb.classList.add("hidden");
+
+    var order={mafia:0,commissar:1,doctor:2,citizen:3};
+    var pl=st.players.slice().sort(function(a,b){return order[st.roles[a]]-order[st.roles[b]]});
+    document.getElementById("plist").innerHTML=pl.map(function(p){var r=st.roles[p];
+      return '<li data-p="'+p+'" class="'+(alive(p)?"":"dead")+'"><span class="pn" style="font-style:normal;color:var(--ink);font-size:18px">'+p+'</span><span class="'+(r==="mafia"?"r-mafia":"")+'">'+ROLES[r].ru+(alive(p)?"":" · выбыла")+'</span></li>'}).join("");
+    document.getElementById("log").innerHTML=st.log.map(function(l){return "<li>"+l+"</li>"}).join("");
+    document.getElementById("logEmpty").classList.toggle("hidden",st.log.length>0);
+  }
+
+  document.getElementById("cells").addEventListener("click",function(e){
+    var b=e.target.closest(".chip2"); if(!b||b.disabled) return;
+    var r=b.getAttribute("data-role"), p=b.getAttribute("data-p");
+    st.pick[r]=(st.pick[r]===p?null:p); saveSt(); renderAdmin();
+  });
+  document.getElementById("plist").addEventListener("click",function(e){
+    var li=e.target.closest("li"); if(!li||st.phase==="over") return;
+    var p=li.getAttribute("data-p"); st.dead[p]=!st.dead[p];
+    st.log.push(st.dead[p] ? "<b>Ведущая</b> отметила: "+p+" выбыла" : "<b>Ведущая</b> вернула в игру: "+p);
+    ["mafia","doctor","commissar"].forEach(function(r){ if(st.pick[r] && !alive(st.pick[r])) st.pick[r]=null });
+    if(st.dayPick && !alive(st.dayPick)) st.dayPick=null;
+    var w=checkWin(); if(w){st.winner=w;st.phase="over"}
+    saveSt(); renderAdmin();
+  });
+  document.getElementById("toMorning").addEventListener("click",function(){
+    var need=[]; ["mafia","doctor","commissar"].forEach(function(r){ if(aliveHolders(r).length && !st.pick[r]) need.push({mafia:"мафию",doctor:"доктора",commissar:"комиссара"}[r]) });
+    if(need.length){ document.getElementById("nightErr").textContent="Ещё не отмечен выбор: "+need.join(", "); return; }
+    var kill=st.pick.mafia, heal=st.pick.doctor, chk=st.pick.commissar;
+    var parts=["<b>Ночь "+st.round+".</b>"];
+    if(kill) parts.push("Мафия выбрала "+kill+".");
+    if(heal) parts.push("Доктор спасала "+heal+".");
+    if(chk) parts.push("Комиссар проверила "+chk+" ("+(st.roles[chk]==="mafia"?"мафия":"не мафия")+").");
+    var saved = kill && kill===heal;
+    if(kill && !saved){ st.dead[kill]=true; parts.push("Погибла "+kill+"."); st.morning='<span class="big">Доброе утро</span>Этой ночью город потерял <b>'+kill+'</b>.<br><i style="color:var(--muted)">Она молча показывает свою карту.</i>'; }
+    else if(saved){ parts.push("Доктор её спасла!"); st.morning='<span class="big">Доброе утро</span>Этой ночью мафия вышла на охоту, но доктор успела. <b>Все живы</b> 🤍'; }
+    else { st.morning='<span class="big">Доброе утро</span>Этой ночью никто не погиб.'; }
+    if(heal){ if(st.roles[heal]==="doctor") st.selfUsed=true; st.lastHeal=heal; }
+    if(aliveHolders("doctor").length===0 && !heal) st.lastHeal=null;
+    st.log.push(parts.join(" "));
+    st.pick={mafia:null,doctor:null,commissar:null}; st.dayPick=null;
+    var w=checkWin(); if(w){st.winner=w;st.phase="over"} else st.phase="day";
+    saveSt(); renderAdmin(); window.scrollTo(0,0);
+  });
+  function endDay(p){
+    if(p){ st.dead[p]=true; st.log.push("<b>День "+st.round+".</b> Город выгнал "+p+" ("+ROLES[st.roles[p]].ru+")."); }
+    else st.log.push("<b>День "+st.round+".</b> Никого не выгнали.");
+    st.dayPick=null; st.round++;
+    var w=checkWin(); if(w){st.winner=w;st.phase="over"} else st.phase="night";
+    saveSt(); renderAdmin(); window.scrollTo(0,0);
+  }
+  document.getElementById("voteGo").addEventListener("click",function(){ if(st.dayPick) endDay(st.dayPick) });
+  document.getElementById("voteSkip").addEventListener("click",function(){ endDay(null) });
+  document.getElementById("startGame").addEventListener("click",startAdmin);
+  document.getElementById("adNew").addEventListener("click",function(){ makeGame(); });
+  document.getElementById("adBack").addEventListener("click",function(){ go("s-game") });
+
   // resume after accidental reload
-  var saved=sget("mafia");
+  var hs=sget("mafiaHost");
+  if(hs){ try{ st=JSON.parse(hs); hostGame=decode(st.code); if(hostGame){ hostGame.code=st.code; document.getElementById("codeBig").textContent=st.code; renderAdmin(); go("s-admin"); } else st=null; }catch(e){ st=null } }
+  var saved=st?null:sget("mafia");
   if(saved){var parts=saved.split("|"); var g=decode(parts[0]); if(g && g.players.indexOf(parts[1])>-1){game=g;game.code=parts[0];me=parts[1];showCard();}}
 })();
 </script>
