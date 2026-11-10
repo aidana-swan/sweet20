@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Mafia Night · Sweet 20</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Pinyon+Script&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#fbf9f6; --paper:#fff; --blue:#a9c4dd; --blue-soft:#dde9f3;
+    --blue-deep:#5f82a3; --navy:#2f4258; --ink:#3d4a5a; --muted:#8794a3; --line:#d7e2ec;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{min-height:100%}
+  body{background:var(--ivory);color:var(--ink);font-family:"Cormorant Garamond",Georgia,serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:radial-gradient(60vmax 50vmax at 10% -10%,var(--blue-soft) 0%,transparent 60%),radial-gradient(50vmax 40vmax at 110% 110%,var(--blue-soft) 0%,transparent 60%)}
+  .bg-swans{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
+  .bg-swan{position:absolute;opacity:.16;animation:float 8s ease-in-out infinite}
+  .bg-swan.flip svg{transform:scaleX(-1)}
+  .bg-swan svg{width:100%;height:auto;display:block}
+  @keyframes float{0%,100%{translate:0 0}50%{translate:0 -8px}}
+
+  main{position:relative;z-index:1;max-width:420px;margin:0 auto;padding:44px 28px 60px;min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
+  .screen{display:none;flex:1;flex-direction:column;animation:fade .6s ease}
+  .screen.on{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .kicker{font-family:"Montserrat",sans-serif;font-weight:300;font-size:10px;letter-spacing:.4em;text-transform:uppercase;color:var(--muted);text-align:center}
+  h1{font-family:"Pinyon Script",cursive;font-weight:400;font-size:clamp(62px,18vw,80px);line-height:1;color:var(--blue-deep);text-align:center;margin:10px 0 4px}
+  h2{font-family:"Pinyon Script",cursive;font-weight:400;font-size:42px;line-height:1.1;color:var(--blue-deep);text-align:center;margin:6px 0 6px}
+  .sub{font-style:italic;color:var(--muted);text-align:center;font-size:17px;line-height:1.5;max-width:290px;margin:0 auto}
+  .center{flex:1;display:flex;flex-direction:column;justify-content:center}
+  .swan-top{width:64px;display:block;margin:0 auto 8px}
+
+  .btn{display:block;width:100%;max-width:300px;margin:12px auto 0;border:none;cursor:pointer;
+    font-family:"Montserrat",sans-serif;font-size:11.5px;letter-spacing:.26em;text-transform:uppercase;
+    padding:16px 22px;border-radius:999px;background:var(--blue-deep);color:#fff;box-shadow:0 12px 24px -14px rgba(95,130,163,.9);transition:transform .15s}
+  .btn:active{transform:scale(.98)}
+  .btn.ghost{background:transparent;color:var(--blue-deep);border:1px solid var(--line);box-shadow:none}
+  .btn:disabled{opacity:.4}
+  .link{background:none;border:none;font-family:"Montserrat",sans-serif;font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted);margin:22px auto 0;display:block;cursor:pointer}
+  .label{font-family:"Montserrat",sans-serif;font-size:9.5px;letter-spacing:.35em;text-transform:uppercase;color:var(--blue-deep);text-align:center;margin:26px 0 12px}
+
+  /* code input */
+  .code-in{display:block;width:100%;max-width:300px;margin:0 auto;text-align:center;
+    font-family:"Cormorant Garamond",serif;font-size:34px;letter-spacing:.3em;text-transform:uppercase;font-weight:500;
+    padding:14px 10px 12px 22px;border:1px solid var(--line);border-radius:18px;background:var(--paper);color:var(--navy);outline:none}
+  .code-in:focus{border-color:var(--blue)}
+  .err{color:#b0675f;font-style:italic;text-align:center;font-size:16px;min-height:22px;margin-top:10px}
+
+  /* names grid */
+  .names{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:320px;margin:0 auto;width:100%}
+  .name{border:1px solid var(--line);background:var(--paper);border-radius:14px;padding:13px 6px;text-align:center;font-family:"Cormorant Garamond",serif;font-size:19px;color:var(--ink);cursor:pointer;transition:all .15s}
+  .name.sel{background:var(--blue-deep);border-color:var(--blue-deep);color:#fff}
+  .name.off{opacity:.35;text-decoration:line-through}
+
+  /* steppers */
+  .row{display:flex;align-items:center;justify-content:space-between;max-width:300px;margin:0 auto;width:100%;padding:12px 0;border-bottom:1px solid var(--line);font-size:19px}
+  .row:last-child{border-bottom:none}
+  .step{display:flex;align-items:center;gap:12px}
+  .step button{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--paper);color:var(--blue-deep);font-size:18px;cursor:pointer}
+  .step b{font-weight:500;font-size:22px;min-width:16px;text-align:center;color:var(--navy)}
+  .toggle{width:46px;height:26px;border-radius:999px;background:var(--line);position:relative;border:none;cursor:pointer;transition:background .2s}
+  .toggle::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.15)}
+  .toggle.on{background:var(--blue-deep)}
+  .toggle.on::after{left:23px}
+  .summary{text-align:center;font-style:italic;color:var(--muted);font-size:16px;margin-top:14px}
+
+  .code-big{font-size:52px;letter-spacing:.22em;font-weight:500;color:var(--navy);text-align:center;margin:6px 0 0 .22em}
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:22px 20px;max-width:320px;margin:0 auto;width:100%}
+  .roles-list{list-style:none}
+  .roles-list li{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:18px}
+  .roles-list li:last-child{border-bottom:none}
+  .roles-list span{font-style:italic;color:var(--muted)}
+  .roles-list .r-mafia{color:var(--navy);font-weight:600;font-style:normal}
+  .script{font-size:17px;line-height:1.6}
+  .script p{margin-bottom:10px}
+  .script b{font-weight:600;color:var(--blue-deep)}
+  .hidden{display:none!important}
+
+  /* ---------- the card ---------- */
+  .stage{perspective:1200px;width:min(280px,74vw);aspect-ratio:5/7;margin:8px auto 0;user-select:none;-webkit-user-select:none;touch-action:none;cursor:pointer}
+  .card{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.3,.7,.2,1)}
+  .stage.show .card{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;border-radius:18px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;box-shadow:0 24px 40px -26px rgba(47,66,88,.55)}
+  .back{background:var(--paper);border:1px solid var(--line);display:flex;align-items:center;justify-content:center}
+  .back::before{content:"";position:absolute;inset:10px;border:1px solid var(--blue);border-radius:12px}
+  .back::after{content:"";position:absolute;inset:15px;border:1px solid var(--line);border-radius:9px;
+    background-image:radial-gradient(circle,var(--blue-soft) 1.2px,transparent 1.4px);background-size:14px 14px}
+  .back .seal{position:relative;z-index:1;width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 35% 30%,#c8dbec,var(--blue) 55%,#86a8c7);color:#fff;font-family:"Pinyon Script",cursive;font-size:38px;
+    box-shadow:0 6px 14px -4px rgba(95,130,163,.6)}
+  .front{transform:rotateY(180deg);background:var(--paper);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:26px 20px}
+  .front::before{content:"";position:absolute;inset:10px;border:1px solid var(--blue);border-radius:12px;pointer-events:none}
+  .front.dark{background:linear-gradient(170deg,#3a5069,var(--navy));border-color:var(--navy);color:#f3f6fa}
+  .front.dark::before{border-color:rgba(255,255,255,.35)}
+  .front .art{width:46%;margin-bottom:10px}
+  .front .art svg{width:100%;height:auto;display:block}
+  .front .role{font-family:"Pinyon Script",cursive;font-size:clamp(44px,13vw,54px);line-height:1;color:var(--blue-deep)}
+  .front.dark .role{color:#dfe9f3}
+  .front .role.long{font-size:clamp(34px,10vw,42px)}
+  .front .ru{font-family:"Montserrat",sans-serif;font-size:9.5px;letter-spacing:.35em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+  .front.dark .ru{color:rgba(255,255,255,.6)}
+  .front .desc{font-style:italic;font-size:15.5px;line-height:1.45;margin-top:12px;max-width:200px;color:var(--ink)}
+  .front.dark .desc{color:rgba(243,246,250,.85)}
+  .front .corner{position:absolute;font-family:"Pinyon Script",cursive;font-size:22px;color:var(--blue)}
+  .front.dark .corner{color:rgba(255,255,255,.45)}
+  .front .tl{top:16px;left:20px}.front .br{bottom:16px;right:20px}
+  .hold{font-family:"Montserrat",sans-serif;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);text-align:center;margin-top:20px}
+  .who{text-align:center;font-family:"Pinyon Script",cursive;font-size:38px;color:var(--blue-deep);line-height:1.1}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="swanS" viewBox="0 0 130 100">
+    <g fill="#a9c4dd" stroke="#5f82a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M30 12C38 12 42 20 38 30C34 40 30 48 36 60C42 70 60 64 74 56C88 48 100 44 114 38C110 54 104 64 96 72C86 84 60 88 44 84C32 80 26 70 28 60C30 50 34 42 34 32C34 26 32 22 28 22L16 24L26 17C27 14 28 12 30 12Z"/>
+      <path d="M52 70C66 66 82 58 98 50" fill="none"/>
+      <path d="M8 93C22 89 34 97 46 93S70 89 82 93S106 97 122 93" fill="none"/>
+    </g>
+  </symbol>
+  <symbol id="swanLine" viewBox="0 0 130 100">
+    <g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M30 12C38 12 42 20 38 30C34 40 30 48 36 60C42 70 60 64 74 56C88 48 100 44 114 38C110 54 104 64 96 72C86 84 60 88 44 84C32 80 26 70 28 60C30 50 34 42 34 32C34 26 32 22 28 22L16 24L26 17C27 14 28 12 30 12Z"/>
+      <path d="M52 70C66 66 82 58 98 50"/>
+      <path d="M8 93C22 89 34 97 46 93S70 89 82 93S106 97 122 93" opacity=".6"/>
+    </g>
+  </symbol>
+</svg>
+<div class="bg-swans" aria-hidden="true" id="bgSwans"></div>
+
+<main>
+  <!-- HOME -->
+  <section class="screen on" id="s-home">
+    <div class="center">
+      <svg class="swan-top" style="color:#7d9fbf"><use href="#swanLine"/></svg>
+      <div class="kicker">sweet 20 presents</div>
+      <h1>Mafia Night</h1>
+      <p class="sub">Кто-то за этим столом не тот, кем кажется…</p>
+      <div style="height:30px"></div>
+      <button class="btn" data-go="s-code">я играю</button>
+      <button class="btn ghost" data-go="s-host">я ведущая</button>
+    </div>
+  </section>
+
+  <!-- PLAYER: CODE -->
+  <section class="screen" id="s-code">
+    <div class="center">
+      <div class="kicker">шаг 1 из 2</div>
+      <h2>Код игры</h2>
+      <p class="sub">Его покажет ведущая</p>
+      <div style="height:22px"></div>
+      <input class="code-in" id="codeIn" maxlength="6" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="······">
+      <div class="err" id="codeErr"></div>
+      <button class="btn" id="codeGo">дальше</button>
+      <button class="link" data-go="s-home">назад</button>
+    </div>
+  </section>
+
+  <!-- PLAYER: NAME -->
+  <section class="screen" id="s-name">
+    <div class="kicker" style="margin-top:10px">шаг 2 из 2</div>
+    <h2>Кто ты?</h2>
+    <p class="sub">Выбери своё имя, чтобы зарегистрироваться</p>
+    <div style="height:22px"></div>
+    <div class="names" id="playerNames"></div>
+    <button class="btn" id="nameGo" disabled>это я</button>
+    <button class="link" data-go="s-code">назад</button>
+  </section>
+
+  <!-- PLAYER: CARD -->
+  <section class="screen" id="s-card">
+    <div class="center">
+      <div class="kicker">твоя роль, только не показывай</div>
+      <div class="who" id="whoName"></div>
+      <div class="stage" id="stage">
+        <div class="card">
+          <div class="face back"><div class="seal">20</div></div>
+          <div class="face front" id="front"></div>
+        </div>
+      </div>
+      <div class="hold">нажми и держи, чтобы увидеть</div>
+      <button class="link" id="leave">выйти из игры</button>
+    </div>
+  </section>
+
+  <!-- HOST: SETUP -->
+  <section class="screen" id="s-host">
+    <div class="kicker" style="margin-top:10px">для ведущей</div>
+    <h2>Новая игра</h2>
+    <p class="sub">Отметь, кто играет сегодня</p>
+    <div style="height:18px"></div>
+    <div class="names" id="hostNames"></div>
+    <div class="label">роли</div>
+    <div class="panel" style="padding:6px 20px">
+      <div class="row">Мафия <div class="step"><button id="mMinus">−</button><b id="mCount">3</b><button id="mPlus">+</button></div></div>
+      <div class="row">Доктор <button class="toggle on" id="tDoc" aria-label="Доктор"></button></div>
+      <div class="row">Комиссар <button class="toggle on" id="tCom" aria-label="Комиссар"></button></div>
+    </div>
+    <div class="summary" id="summary"></div>
+    <button class="btn" id="create">создать игру</button>
+    <button class="link" data-go="s-home">назад</button>
+  </section>
+
+  <!-- HOST: GAME -->
+  <section class="screen" id="s-game">
+    <div class="kicker" style="margin-top:10px">код игры</div>
+    <div class="code-big" id="codeBig"></div>
+    <p class="sub">Попроси всех открыть сайт, нажать «я играю» и ввести этот код</p>
+
+    <div class="label">роли игроков</div>
+    <button class="btn ghost" id="revealRoles">показать роли (только мне)</button>
+    <div class="panel hidden" id="rolesPanel" style="margin-top:12px"><ul class="roles-list" id="rolesList"></ul></div>
+
+    <div class="label">шпаргалка ведущей</div>
+    <div class="panel script">
+      <p><b>Ночь.</b> «Город засыпает, все закрывают глаза».</p>
+      <p><b>Мафия</b> просыпается, молча выбирает жертву и засыпает.</p>
+      <p><b>Доктор</b> просыпается и показывает, кого спасает (себя можно один раз за игру).</p>
+      <p><b>Комиссар</b> просыпается и показывает на игрока. Кивни, если это мафия, покачай головой, если нет.</p>
+      <p><b>Утро.</b> «Город просыпается». Объяви, кого убили, или что доктор всех спас.</p>
+      <p><b>День.</b> Все обсуждают и голосуют. Тот, против кого больше голосов, выбывает и молча открывает карту.</p>
+      <p>Мирные побеждают, когда вся мафия выбыла. Мафия побеждает, когда её не меньше, чем мирных.</p>
+    </div>
+
+    <button class="btn" id="newRound">новый раунд, те же игроки</button>
+    <button class="link" data-go="s-host">изменить игроков</button>
+  </section>
+</main>
+
+<script>
+(function(){
+  var PEOPLE = ["Aidana","Gulkair","Geshulik","Malikisa","Ayanka","Sezya","Aybesha","Begasha","Tallulah","Amal","Sati","Zhanyl","Deniz"];
+  var A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+  var ART = {
+    mafia:'<svg viewBox="0 0 120 70" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22C20 14 40 14 60 24C80 14 100 14 112 22C114 40 104 56 86 56C74 56 66 48 60 42C54 48 46 56 34 56C16 56 6 40 8 22Z"/><path d="M26 32C32 28 40 28 46 34C40 40 32 40 26 32Z"/><path d="M74 34C80 28 88 28 94 32C88 40 80 40 74 34Z"/><path d="M60 24V12M60 12C56 6 52 4 48 6M60 12C64 6 68 4 72 6" opacity=".7"/></svg>',
+    doctor:'<svg viewBox="0 0 100 90" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M50 82S10 58 6 32C3 16 14 6 27 6C37 6 45 12 50 20C55 12 63 6 73 6C86 6 97 16 94 32C90 58 50 82 50 82Z"/><path d="M50 30V54M38 42H62"/></svg>',
+    commissar:'<svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="42" cy="42" r="28"/><circle cx="42" cy="42" r="20" opacity=".5"/><path d="M62 62L90 90"/><path d="M30 34C33 28 38 25 44 25" opacity=".7"/></svg>',
+    citizen:'<svg viewBox="0 0 130 100"><use href="#swanLine"/></svg>'
+  };
+  var ROLES = {
+    mafia:{en:"Mafia",ru:"мафия",desc:"Ночью вместе с другой мафией выбираешь жертву. Днём ты сама невинность.",dark:true},
+    doctor:{en:"Doctor",ru:"доктор",desc:"Каждую ночь можешь спасти одного человека от мафии."},
+    commissar:{en:"Commissar",ru:"комиссар",desc:"Каждую ночь проверяешь одного игрока: мафия или нет."},
+    citizen:{en:"Citizen",ru:"мирная жительница",desc:"Ищи мафию, спорь, голосуй и не дай себя обмануть."}
+  };
+
+  // background swans
+  var sw=[["6%","7%",64,"",0],["72%","12%",48,"flip",1.5],["-4%","55%",58,"flip",3],["76%","72%",76,"",2],["14%","88%",42,"flip",4.5],["80%","38%",36,"",6]];
+  document.getElementById("bgSwans").innerHTML = sw.map(function(s){return '<div class="bg-swan '+s[3]+'" style="left:'+s[0]+';top:'+s[1]+';width:'+s[2]+'px;animation-delay:-'+s[4]+'s"><svg viewBox="0 0 130 100"><use href="#swanS"/></svg></div>'}).join("");
+
+  // storage helpers
+  function sget(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function sset(k,v){try{v===null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(e){}}
+
+  // navigation
+  function go(id){document.querySelectorAll(".screen").forEach(function(s){s.classList.toggle("on",s.id===id)});window.scrollTo(0,0)}
+  document.querySelectorAll("[data-go]").forEach(function(b){b.addEventListener("click",function(){go(b.getAttribute("data-go"))})});
+
+  // ---------- code encoding: 13-bit mask | mafia-1 (2) | doc (1) | com (1) | seed (13) = 30 bits ----------
+  function encode(g){
+    var n = (g.mask) | ((g.m-1)<<13) | ((g.doc?1:0)<<15) | ((g.com?1:0)<<16) | (g.seed<<17);
+    var s=""; for(var i=0;i<6;i++){ s = A[n & 31] + s; n = n>>>5; } return s;
+  }
+  function decode(code){
+    code=(code||"").toUpperCase().replace(/[^A-Z0-9]/g,"");
+    if(code.length!==6) return null;
+    var n=0; for(var i=0;i<6;i++){ var v=A.indexOf(code[i]); if(v<0) return null; n = n*32 + v; }
+    var g={mask:n & 8191, m:((n>>>13)&3)+1, doc:!!((n>>>15)&1), com:!!((n>>>16)&1), seed:(n>>>17)&8191};
+    var players=PEOPLE.filter(function(_,i){return g.mask & (1<<i)});
+    var special=g.m+(g.doc?1:0)+(g.com?1:0);
+    if(players.length<4 || special>=players.length) return null;
+    g.players=players; return g;
+  }
+  function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+  function assign(g){
+    var roles=[]; for(var i=0;i<g.m;i++) roles.push("mafia");
+    if(g.doc) roles.push("doctor"); if(g.com) roles.push("commissar");
+    while(roles.length<g.players.length) roles.push("citizen");
+    var r=rng(g.seed*8191+g.mask+g.m*7+(g.doc?3:0)+(g.com?5:0));
+    for(var j=roles.length-1;j>0;j--){var k=Math.floor(r()*(j+1));var t=roles[j];roles[j]=roles[k];roles[k]=t}
+    var out={}; g.players.forEach(function(p,i){out[p]=roles[i]}); return out;
+  }
+
+  // ---------- player ----------
+  var game=null, me=null;
+  var codeIn=document.getElementById("codeIn"), codeErr=document.getElementById("codeErr");
+  codeIn.addEventListener("input",function(){codeIn.value=codeIn.value.toUpperCase().replace(/[^A-Z0-9]/g,"");codeErr.textContent=""});
+  function submitCode(){
+    var g=decode(codeIn.value);
+    if(!g){codeErr.textContent="Такого кода нет, проверь ещё раз";return}
+    game=g; game.code=codeIn.value.toUpperCase(); me=null;
+    var box=document.getElementById("playerNames"); box.innerHTML="";
+    g.players.forEach(function(p){
+      var b=document.createElement("button"); b.className="name"; b.textContent=p;
+      b.addEventListener("click",function(){box.querySelectorAll(".name").forEach(function(x){x.classList.remove("sel")});b.classList.add("sel");me=p;document.getElementById("nameGo").disabled=false});
+      box.appendChild(b);
+    });
+    document.getElementById("nameGo").disabled=true;
+    go("s-name");
+  }
+  document.getElementById("codeGo").addEventListener("click",submitCode);
+  codeIn.addEventListener("keydown",function(e){if(e.key==="Enter")submitCode()});
+  document.getElementById("nameGo").addEventListener("click",function(){ if(me){ sset("mafia",game.code+"|"+me); showCard(); } });
+
+  function showCard(){
+    var role=assign(game)[me], R=ROLES[role];
+    document.getElementById("whoName").textContent=me;
+    var f=document.getElementById("front");
+    f.className="face front"+(R.dark?" dark":"");
+    f.innerHTML='<span class="corner tl">20</span><span class="corner br">20</span><div class="art" style="color:'+(R.dark?"#dfe9f3":"#7d9fbf")+'">'+ART[role]+'</div><div class="role'+(R.en.length>8?' long':'')+'">'+R.en+'</div><div class="ru">'+R.ru+'</div><div class="desc">'+R.desc+'</div>';
+    go("s-card");
+  }
+  var stage=document.getElementById("stage");
+  function show(e){e.preventDefault();stage.classList.add("show")}
+  function hide(){stage.classList.remove("show")}
+  stage.addEventListener("pointerdown",show);
+  ["pointerup","pointerleave","pointercancel"].forEach(function(ev){stage.addEventListener(ev,hide)});
+  stage.addEventListener("contextmenu",function(e){e.preventDefault()});
+  document.getElementById("leave").addEventListener("click",function(){sset("mafia",null);codeIn.value="";go("s-home")});
+
+  // ---------- host ----------
+  var sel=PEOPLE.map(function(){return true}), mCount=3, doc=true, com=true, hostGame=null;
+  var hostNames=document.getElementById("hostNames");
+  PEOPLE.forEach(function(p,i){
+    var b=document.createElement("button"); b.className="name"; b.textContent=p;
+    b.addEventListener("click",function(){sel[i]=!sel[i];b.classList.toggle("off",!sel[i]);autoMafia();upd()});
+    hostNames.appendChild(b);
+  });
+  function count(){return sel.filter(Boolean).length}
+  function autoMafia(){var n=count(); mCount = n<=6?1 : n<=9?2 : n<=13?3 : 4;}
+  function upd(){
+    var n=count(), sp=mCount+(doc?1:0)+(com?1:0), cit=n-sp;
+    document.getElementById("mCount").textContent=mCount;
+    document.getElementById("tDoc").classList.toggle("on",doc);
+    document.getElementById("tCom").classList.toggle("on",com);
+    var ok = n>=4 && cit>=1;
+    document.getElementById("summary").textContent = ok ? (n+" игроков: "+mCount+" мафия"+(doc?", доктор":"")+(com?", комиссар":"")+", мирных "+cit) : "Нужно хотя бы 4 игрока и 1 мирная";
+    document.getElementById("create").disabled=!ok;
+  }
+  document.getElementById("mMinus").addEventListener("click",function(){if(mCount>1){mCount--;upd()}});
+  document.getElementById("mPlus").addEventListener("click",function(){if(mCount<4){mCount++;upd()}});
+  document.getElementById("tDoc").addEventListener("click",function(){doc=!doc;upd()});
+  document.getElementById("tCom").addEventListener("click",function(){com=!com;upd()});
+  upd();
+
+  function makeGame(){
+    var mask=0; sel.forEach(function(s,i){if(s)mask|=1<<i});
+    var seed=Math.floor(Math.random()*8191)+1;
+    hostGame=decode(encode({mask:mask,m:mCount,doc:doc,com:com,seed:seed}));
+    hostGame.code=encode(hostGame);
+    document.getElementById("codeBig").textContent=hostGame.code;
+    var roles=assign(hostGame), order={mafia:0,commissar:1,doctor:2,citizen:3};
+    var list=hostGame.players.slice().sort(function(a,b){return order[roles[a]]-order[roles[b]]});
+    document.getElementById("rolesList").innerHTML=list.map(function(p){var r=roles[p];return '<li>'+p+' <span class="'+(r==="mafia"?"r-mafia":"")+'">'+ROLES[r].ru+'</span></li>'}).join("");
+    document.getElementById("rolesPanel").classList.add("hidden");
+    document.getElementById("revealRoles").textContent="показать роли (только мне)";
+    go("s-game");
+  }
+  document.getElementById("create").addEventListener("click",makeGame);
+  document.getElementById("newRound").addEventListener("click",makeGame);
+  document.getElementById("revealRoles").addEventListener("click",function(){
+    var p=document.getElementById("rolesPanel"); p.classList.toggle("hidden");
+    this.textContent=p.classList.contains("hidden")?"показать роли (только мне)":"скрыть роли";
+  });
+
+  // resume after accidental reload
+  var saved=sget("mafia");
+  if(saved){var parts=saved.split("|"); var g=decode(parts[0]); if(g && g.players.indexOf(parts[1])>-1){game=g;game.code=parts[0];me=parts[1];showCard();}}
+})();
+</script>
+</body>
+</html>
