@@ -108,6 +108,20 @@
   .bg-swan.flip{transform:scaleX(-1)}
   .bg-swan svg{width:100%;height:auto;display:block}
   @keyframes float{0%,100%{translate:0 0}50%{translate:0 -8px}}
+  .music{position:fixed;right:16px;bottom:16px;z-index:30;width:46px;height:46px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(255,255,255,.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);color:var(--blue-deep);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 10px 20px -14px rgba(61,74,90,.5);transition:opacity .4s}
+  .music.hidden{opacity:0;pointer-events:none}
+  .music svg{width:18px;height:18px}
+  .music .bars{position:absolute;bottom:9px;display:flex;gap:2px;opacity:0;transition:opacity .3s}
+  .music.playing .bars{opacity:1}
+  .music.playing svg{transform:translateY(-4px) scale(.85)}
+  .music svg{transition:transform .3s}
+  .music .bars i{width:2px;height:6px;background:var(--blue);border-radius:1px;animation:eq 1s ease-in-out infinite}
+  .music .bars i:nth-child(2){animation-delay:-.3s}.music .bars i:nth-child(3){animation-delay:-.6s}
+  @keyframes eq{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1.2)}}
+  .music.off{color:var(--muted)}
+  .music.off::after{content:"";position:absolute;width:24px;height:1.5px;background:var(--muted);transform:rotate(-45deg)}
   .tap{transition:opacity .4s;font-family:"Montserrat",sans-serif;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--muted)}
 
   /* ---------- main ---------- */
@@ -294,6 +308,12 @@
   </footer>
 </main>
 
+<audio id="bgm" loop preload="auto" playsinline><source src="music.mp3" type="audio/mpeg"><source src="music.m4a" type="audio/mp4"></audio>
+<button class="music hidden" id="musicBtn" aria-label="Музыка">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>
+  <span class="bars"><i></i><i></i><i></i></span>
+</button>
+
 <script>
   // Personal links: add #name to the URL, e.g. ...#malika
   var GUESTS = {
@@ -316,10 +336,31 @@
   // Open
   var intro = document.getElementById("intro"), main = document.getElementById("main");
   var opened = false;
+  // music: starts on the envelope tap (browsers need a tap before sound)
+  var bgm=document.getElementById("bgm"), mbtn=document.getElementById("musicBtn"), hasMusic=true, fadeT=null;
+  bgm.addEventListener("error",function(){ hasMusic=false; mbtn.classList.add("hidden"); });
+  function fadeTo(v,ms){
+    clearInterval(fadeT); var start=bgm.volume, t0=Date.now();
+    fadeT=setInterval(function(){ var k=Math.min(1,(Date.now()-t0)/ms); try{bgm.volume=start+(v-start)*k}catch(e){} if(k>=1){clearInterval(fadeT); if(v===0) bgm.pause();} },50);
+  }
+  function setPlaying(on){ mbtn.classList.toggle("playing",on); mbtn.classList.toggle("off",!on); }
+  function startMusic(){
+    if(!hasMusic) return;
+    try{ bgm.volume=0; }catch(e){}
+    var p=bgm.play();
+    if(p && p.then){ p.then(function(){ fadeTo(.6,2500); setPlaying(true); setTimeout(function(){ mbtn.classList.remove("hidden"); },1800); }).catch(function(){}); }
+  }
+  mbtn.addEventListener("click",function(){
+    if(bgm.paused){ var p=bgm.play(); if(p&&p.then) p.then(function(){fadeTo(.6,800);setPlaying(true)}).catch(function(){}); }
+    else { fadeTo(0,500); setPlaying(false); }
+  });
+  document.addEventListener("visibilitychange",function(){ if(document.hidden && !bgm.paused){ bgm.pause(); setPlaying(false); } });
+
   function open(){
     if(opened) return; opened = true;
     var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
     intro.classList.add("opening");
+    startMusic();
     setTimeout(function(){
       intro.classList.add("gone");
       main.setAttribute("aria-hidden","false");
